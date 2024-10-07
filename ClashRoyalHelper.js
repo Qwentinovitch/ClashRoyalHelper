@@ -22,15 +22,36 @@ const fetchClanPlayers = async () => {
             }
         });
 
+        const currentRiverRaceResponse = await axios.get(`https://api.clashroyale.com/v1/clans/${encodeURIComponent(CLAN_TAG)}/currentriverrace`, {
+            headers: {
+                'Authorization': `Bearer ${API_KEY}`
+            }
+        });
+
+        console.log("Players with less than 600 points:")
+
+        const currentParticipants = currentRiverRaceResponse.data.clan.participants;
+        const currentWarPlayersBelow600 = clanMembers.filter(member => {
+            const playerRiverRaceStats = currentParticipants.find(log => log.tag === member.tag);
+            return playerRiverRaceStats && playerRiverRaceStats.fame < 600;
+        });
+        console.log("\n\r")
+        console.log("Current River Race: ",currentWarPlayersBelow600.length,"\r\n");
+        currentWarPlayersBelow600.forEach(player => {
+            console.log(`${player.role} - ${player.name} (${player.trophies} trophies)`);
+        });
+
         const riverRaceLog = riverRaceResponse.data.items[0];
         const clanRiverRaceStats = riverRaceLog.standings.find(clanTag => clanTag.clan.tag === CLAN_TAG);
+
         const playersBelow600 = clanMembers.filter(member => {
             const playerRiverRaceStats = clanRiverRaceStats.clan.participants.find(log => log.tag === member.tag);
             return playerRiverRaceStats && playerRiverRaceStats.fame < 600;
         });
 
-        console.log(playersBelow600)
-        console.log("Players with less than 600 points in the River Race:");
+        // console.log(playersBelow600)
+        console.log("\n\r----------------------------------")
+        console.log("Past River Race:",playersBelow600.length,"\r\n");
         playersBelow600.forEach(player => {
             console.log(`${player.role} - ${player.name} (${player.trophies} trophies)`);
         });
